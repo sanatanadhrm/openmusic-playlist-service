@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider      = "prisma-client"
+  output        = "../src/Infrastructures/database/postgresql/generated/prisma"
+  binaryTargets = ["native", "linux-musl", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Tabel Cache untuk Optimasi CQRS (Replikasi data dari Catalog Service via RabbitMQ)
+model CachedSong {
+  id        String  @id // ID lagu menggunakan ID asli dari Catalog Service
+  title     String
+  year      Int
+  performer String
+  genre     String
+  duration  Int?
+  albumId   String?
+
+  playlistSongs PlaylistSong[]
+  activities    PlaylistSongActivity[]
+
+  @@map("cached_songs")
+}
+
+model Playlist {
+  id      String @id @default(cuid())
+  name    String
+  ownerId String
+
+  songs          PlaylistSong[]
+  collaborations Collaboration[]
+  activities     PlaylistSongActivity[]
+
+  @@map("playlists")
+}
+
+// Tabel penghubung many-to-many antara Playlist dan CachedSong
+model PlaylistSong {
+  id         String @id @default(cuid())
+  playlistId String
+  songId     String
+
+  playlist Playlist   @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  song     CachedSong @relation(fields: [songId], references: [id], onDelete: Cascade) // Cascade Delete CQRS
+
+  @@unique([playlistId, songId]) // cegah lagu yang sama double-entry di playlist yang sama
+  @@map("playlist_songs")
+}
+
+// Kolaborator playlist (endpoint POST/DELETE /collaborations)
+model Collaboration {
+  id         String @id @default(cuid())
+  playlistId String
+  userId     String
+
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, userId]) // satu user hanya bisa jadi kolaborator sekali per playlist
+  @@map("collaborations")
+}
+
+// Riwayat aktivitas playlist (endpoint GET /playlists/{id}/activities)
+model PlaylistSongActivity {
+  id         String   @id @default(cuid())
+  playlistId String
+  songId     String
+  userId     String
+  action     String // "add" | "delete"
+  time       DateTime @default(now())
+
+  playlist Playlist   @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  song     CachedSong @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  @@map("playlist_song_activities")
+}
