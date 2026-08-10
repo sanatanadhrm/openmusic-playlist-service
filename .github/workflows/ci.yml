@@ -48,18 +48,9 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/openmusic-playlist:latest
 
-      - name: 8. Send Slack Notification
-        if: always()
-        uses: slackapi/slack-github-action@v1.26.0
-        with:
-          payload: |
-            {
-              "text": "📢 *CI/CD Status*: ${{ job.status == 'success' && '✅ SUKSES' || '❌ GAGAL' }}\n*Repository*: ${{ github.repository }}\n*Branch*: ${{ github.ref_name }}\n*Commit By*: ${{ github.actor }}"
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-      - name: 9. Send Discord Notification
+
+      - name: 8. Send Discord Notification
         if: always()
         uses: sarisia/actions-status-discord@v1
         with:
