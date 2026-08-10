@@ -20,7 +20,10 @@ export const createServer = async () => {
 
     app.use(morganMiddleware);
     app.use(json());
-    app.use(cors());
+    app.use(cors({
+        origin: 'http://localhost:3000',
+        credentials: true
+    }));
     app.use(urlencoded({ extended: true }));
 
     app.use("/playlists", playlist);
