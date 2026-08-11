@@ -21,7 +21,7 @@ export const createServer = async () => {
 
     app.use(morganMiddleware);
     app.use(json());
-    app.use(CorsMiddleware);
+    app.use(CorsMiddleware());
 
     // Metrics
     collectDefaultMetrics();
