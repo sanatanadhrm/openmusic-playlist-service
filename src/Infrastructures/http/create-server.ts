@@ -1,5 +1,4 @@
 import express, { json, urlencoded } from "express";
-import cors from "cors";
 
 import playlist from "@/interfaces/http/api/playlist";
 import collaboration from "@/interfaces/http/api/collaboration";
@@ -8,6 +7,8 @@ import { errorHandler } from "./middleware/pre-response";
 import morganMiddleware from "./middleware/logger";
 import { redisConnection } from "@/Infrastructures/cache/redis/redis-connection";
 import logger from "@/Infrastructures/logger/winston/winston-config";
+import { collectDefaultMetrics, register } from "prom-client";
+import { CorsMiddleware } from "./middleware/cors";
 
 export const createServer = async () => {
     const app = express();
@@ -20,10 +21,15 @@ export const createServer = async () => {
 
     app.use(morganMiddleware);
     app.use(json());
-    app.use(cors({
-        origin: 'http://localhost:3000',
-        credentials: true
-    }));
+    app.use(CorsMiddleware);
+
+    // Metrics
+    collectDefaultMetrics();
+    app.get("/metrics", async (_req, res) => {
+        res.set("Content-Type", register.contentType);
+        res.end(await register.metrics());
+    });
+
     app.use(urlencoded({ extended: true }));
 
     app.use("/playlists", playlist);
