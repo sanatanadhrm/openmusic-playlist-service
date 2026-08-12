@@ -9,6 +9,7 @@ import { redisConnection } from "@/Infrastructures/cache/redis/redis-connection"
 import logger from "@/Infrastructures/logger/winston/winston-config";
 import { collectDefaultMetrics, register } from "prom-client";
 import { CorsMiddleware } from "./middleware/cors";
+import { metricsMiddleware } from "./middleware/metrics";
 
 export const createServer = async () => {
     const app = express();
@@ -24,6 +25,7 @@ export const createServer = async () => {
     app.use(CorsMiddleware());
 
     // Metrics
+    app.use(metricsMiddleware)
     collectDefaultMetrics();
     app.get("/metrics", async (_req, res) => {
         res.set("Content-Type", register.contentType);
