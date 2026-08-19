@@ -1,13 +1,21 @@
 // src/interfaces/http/api/collaboration/index.ts
 
 import { Router } from "express";
+import { Container } from "instances-container";
 import { routes } from "./routes";
 import { CollaborationHandler } from "./handler";
+import { AddCollaborationUseCase } from "@/applications/usecase/collaboration/add-collaboration";
+import { RemoveCollaborationUseCase } from "@/applications/usecase/collaboration/remove-collaboration";
 
-const router = Router();
+export const collaborationApi = (container: Container): Router => {
+    const router = Router();
 
-const collaborationHandler = new CollaborationHandler();
+    const addCollaborationUseCase = container.getInstance(AddCollaborationUseCase.name) as AddCollaborationUseCase;
+    const removeCollaborationUseCase = container.getInstance(RemoveCollaborationUseCase.name) as RemoveCollaborationUseCase;
 
-routes(router, collaborationHandler);
+    const collaborationHandler = new CollaborationHandler(addCollaborationUseCase, removeCollaborationUseCase);
 
-export default router;
+    routes(router, collaborationHandler);
+
+    return router;
+};

@@ -1,18 +1,18 @@
 // src/interfaces/http/api/export/handler.ts
 import { Request, Response, NextFunction } from "express";
-import { getInstance } from "@/Infrastructures/container";
 import { ExportPlaylistUseCase } from "@/applications/usecase/export/export-playlist";
 
 export class ExportHandler {
-    constructor() {}
+    constructor(
+        private readonly exportPlaylistUseCase: ExportPlaylistUseCase
+    ) {}
 
-    async exportPlaylistHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+    exportPlaylistHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const exportPlaylistUseCase = getInstance<ExportPlaylistUseCase>(ExportPlaylistUseCase.name);
             const userId = req.user!.id;
             const playlistId = req.params.playlistId as string;
 
-            await exportPlaylistUseCase.execute(userId, playlistId, req.body);
+            await this.exportPlaylistUseCase.execute(userId, playlistId, req.body);
 
             res.status(201).json({
                 status: "success",

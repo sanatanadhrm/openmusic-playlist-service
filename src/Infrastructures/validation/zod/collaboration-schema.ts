@@ -2,15 +2,14 @@
 // Implementasi konkret CollaborationValidator menggunakan Zod v4
 
 import { CollaborationPayload, CollaborationValidator } from "@/applications/validation/collaboration-validator";
-import { DomainErrorCode } from "@/commons/exception/constants/domain-error-code";
 import { InvariantError } from "@/commons/exception/invariant-error";
 import z from "zod";
 
 const collaborationSchema = z.object({
-    playlistId: z.string(DomainErrorCode.COLLABORATION_NOT_MEET_DATA_TYPE_SPECIFICATION)
-        .min(1, DomainErrorCode.COLLABORATION_NOT_CONTAIN_NEEDED_PROPERTY),
-    userId: z.string(DomainErrorCode.COLLABORATION_NOT_MEET_DATA_TYPE_SPECIFICATION)
-        .min(1, DomainErrorCode.COLLABORATION_NOT_CONTAIN_NEEDED_PROPERTY),
+    playlistId: z.string("playlistId must be string")
+        .min(1, "playlistId must not be empty"),
+    userId: z.string("userId must be string")
+        .min(1, "userId must not be empty"),
 });
 
 export class ZodCollaborationValidator implements CollaborationValidator {

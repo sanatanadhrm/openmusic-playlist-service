@@ -1,17 +1,18 @@
 // src/interfaces/http/api/collaboration/handler.ts
 import { Request, Response, NextFunction } from "express";
-import { getInstance } from "@/Infrastructures/container";
 import { AddCollaborationUseCase } from "@/applications/usecase/collaboration/add-collaboration";
 import { RemoveCollaborationUseCase } from "@/applications/usecase/collaboration/remove-collaboration";
 
 export class CollaborationHandler {
-    constructor() {}
+    constructor(
+        private readonly addCollaborationUseCase: AddCollaborationUseCase,
+        private readonly removeCollaborationUseCase: RemoveCollaborationUseCase
+    ) {}
 
-    async addCollaborationHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+    addCollaborationHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const addCollaborationUseCase = getInstance<AddCollaborationUseCase>(AddCollaborationUseCase.name);
             const requesterId = req.user!.id;
-            const addedCollaboration = await addCollaborationUseCase.execute(requesterId, req.body);
+            const addedCollaboration = await this.addCollaborationUseCase.execute(requesterId, req.body);
 
             res.status(201).json({
                 status: "success",
@@ -23,11 +24,10 @@ export class CollaborationHandler {
         }
     }
 
-    async removeCollaborationHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+    removeCollaborationHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const removeCollaborationUseCase = getInstance<RemoveCollaborationUseCase>(RemoveCollaborationUseCase.name);
             const requesterId = req.user!.id;
-            await removeCollaborationUseCase.execute(requesterId, req.body);
+            await this.removeCollaborationUseCase.execute(requesterId, req.body);
 
             res.status(200).json({
                 status: "success",

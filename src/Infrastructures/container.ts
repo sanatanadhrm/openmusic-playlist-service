@@ -36,6 +36,10 @@ import { GetPlaylistActivitiesUseCase } from "@/applications/usecase/playlist/ge
 import { AddCollaborationUseCase } from "@/applications/usecase/collaboration/add-collaboration";
 import { RemoveCollaborationUseCase } from "@/applications/usecase/collaboration/remove-collaboration";
 import { ExportPlaylistUseCase } from "@/applications/usecase/export/export-playlist";
+import { AddCachedSongUseCase } from "@/applications/usecase/cached-song/add-cached-song";
+import { ZodCachedSongValidator } from "./validation/zod/cached-song-schema";
+import { UpdateCachedSongUseCase } from "@/applications/usecase/cached-song/update-cached-song";
+import { RemoveCachedSongUseCase } from "@/applications/usecase/cached-song/remove-cached-song";
 
 const container = createContainer();
 
@@ -137,12 +141,49 @@ container.register([
         Class: ZodExportValidator,
         parameter: { dependencies: [] },
     },
+    {
+        key: ZodCachedSongValidator.name,
+        Class: ZodCachedSongValidator,
+        parameter: { dependencies: [] }
+    }
 ]);
 
 // ==========================================
 // REGISTER USE CASES
 // ==========================================
 container.register([
+    {
+        key: AddCachedSongUseCase.name,
+        Class: AddCachedSongUseCase,
+        parameter: {
+            injectType: "destructuring",
+            dependencies: [
+                { name: "cachedSongRepository", internal: CachedSongRepositoryPrisma.name },
+                { name: "cachedSongValidator", internal: ZodCachedSongValidator.name },
+            ],
+        },
+    },
+    {
+        key: UpdateCachedSongUseCase.name,
+        Class: UpdateCachedSongUseCase,
+        parameter: {
+            injectType: "destructuring",
+            dependencies: [
+                { name: "cachedSongRepository", internal: CachedSongRepositoryPrisma.name },
+                { name: "cachedSongValidator", internal: ZodCachedSongValidator.name },
+            ],
+        }
+    },
+    {
+        key: RemoveCachedSongUseCase.name,
+        Class: RemoveCachedSongUseCase,
+        parameter: {
+            injectType: "destructuring",
+            dependencies: [
+                { name: "cachedSongRepository", internal: CachedSongRepositoryPrisma.name },
+            ]
+        }
+    },
     {
         key: AddPlaylistUseCase.name,
         Class: AddPlaylistUseCase,

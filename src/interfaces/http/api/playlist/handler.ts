@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import { getInstance } from "@/Infrastructures/container";
 import { AddPlaylistUseCase } from "@/applications/usecase/playlist/add-playlist";
 import { GetPlaylistsUseCase } from "@/applications/usecase/playlist/get-playlists";
 import { DeletePlaylistUseCase } from "@/applications/usecase/playlist/delete-playlist";
@@ -9,13 +8,20 @@ import { RemoveSongFromPlaylistUseCase } from "@/applications/usecase/playlist/r
 import { GetPlaylistActivitiesUseCase } from "@/applications/usecase/playlist/get-playlist-activities";
 
 export class PlaylistHandler {
-    constructor() {}
+    constructor(
+        private readonly addPlaylistUseCase: AddPlaylistUseCase,
+        private readonly getPlaylistsUseCase: GetPlaylistsUseCase,
+        private readonly deletePlaylistUseCase: DeletePlaylistUseCase,
+        private readonly getSongsInPlaylistUseCase: GetSongsInPlaylistUseCase,
+        private readonly addSongToPlaylistUseCase: AddSongToPlaylistUseCase,
+        private readonly removeSongFromPlaylistUseCase: RemoveSongFromPlaylistUseCase,
+        private readonly getPlaylistActivitiesUseCase: GetPlaylistActivitiesUseCase
+    ) {}
 
-    async addPlaylistHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+    addPlaylistHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const addPlaylistUseCase = getInstance<AddPlaylistUseCase>(AddPlaylistUseCase.name);
             const ownerId = req.user!.id;
-            const addedPlaylist = await addPlaylistUseCase.execute(req.body, ownerId);
+            const addedPlaylist = await this.addPlaylistUseCase.execute(req.body, ownerId);
 
             res.status(201).json({
                 status: "success",
@@ -27,11 +33,10 @@ export class PlaylistHandler {
         }
     }
 
-    async getPlaylistsHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+    getPlaylistsHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const getPlaylistsUseCase = getInstance<GetPlaylistsUseCase>(GetPlaylistsUseCase.name);
             const userId = req.user!.id;
-            const playlists = await getPlaylistsUseCase.execute(userId);
+            const playlists = await this.getPlaylistsUseCase.execute(userId);
 
             res.status(200).json({
                 status: "success",
@@ -42,12 +47,11 @@ export class PlaylistHandler {
         }
     }
 
-    async deletePlaylistHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+    deletePlaylistHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const deletePlaylistUseCase = getInstance<DeletePlaylistUseCase>(DeletePlaylistUseCase.name);
             const userId = req.user!.id;
             const playlistId = req.params.id as string;
-            await deletePlaylistUseCase.execute(playlistId, userId);
+            await this.deletePlaylistUseCase.execute(playlistId, userId);
 
             res.status(200).json({
                 status: "success",
@@ -58,12 +62,11 @@ export class PlaylistHandler {
         }
     }
 
-    async getSongsInPlaylistHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+    getSongsInPlaylistHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const getSongsInPlaylistUseCase = getInstance<GetSongsInPlaylistUseCase>(GetSongsInPlaylistUseCase.name);
             const playlistId = req.params.id;
             const userId = req.user!.id;
-            const result = await getSongsInPlaylistUseCase.execute(playlistId, userId, req.query);
+            const result = await this.getSongsInPlaylistUseCase.execute(playlistId, userId, req.query);
 
             res.status(200).json({
                 status: "success",
@@ -75,12 +78,11 @@ export class PlaylistHandler {
         }
     }
 
-    async addSongToPlaylistHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+    addSongToPlaylistHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const addSongToPlaylistUseCase = getInstance<AddSongToPlaylistUseCase>(AddSongToPlaylistUseCase.name);
             const playlistId = req.params.id;
             const userId = req.user!.id;
-            await addSongToPlaylistUseCase.execute(playlistId, userId, req.body);
+            await this.addSongToPlaylistUseCase.execute(playlistId, userId, req.body);
 
             res.status(201).json({
                 status: "success",
@@ -91,12 +93,11 @@ export class PlaylistHandler {
         }
     }
 
-    async removeSongFromPlaylistHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+    removeSongFromPlaylistHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const removeSongFromPlaylistUseCase = getInstance<RemoveSongFromPlaylistUseCase>(RemoveSongFromPlaylistUseCase.name);
             const playlistId = req.params.id as string;
             const userId = req.user!.id;
-            await removeSongFromPlaylistUseCase.execute(playlistId, userId, req.body);
+            await this.removeSongFromPlaylistUseCase.execute(playlistId, userId, req.body);
 
             res.status(200).json({
                 status: "success",
@@ -107,12 +108,11 @@ export class PlaylistHandler {
         }
     }
 
-    async getPlaylistActivitiesHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+    getPlaylistActivitiesHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const getPlaylistActivitiesUseCase = getInstance<GetPlaylistActivitiesUseCase>(GetPlaylistActivitiesUseCase.name);
             const playlistId = req.params.id as string;
             const userId = req.user!.id;
-            const activities = await getPlaylistActivitiesUseCase.execute(playlistId, userId);
+            const activities = await this.getPlaylistActivitiesUseCase.execute(playlistId, userId);
 
             res.status(200).json({
                 status: "success",

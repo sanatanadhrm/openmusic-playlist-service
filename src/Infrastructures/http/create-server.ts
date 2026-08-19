@@ -1,8 +1,9 @@
 import express, { json, urlencoded } from "express";
+import { Container } from "instances-container";
 
-import playlist from "@/interfaces/http/api/playlist";
-import collaboration from "@/interfaces/http/api/collaboration";
-import _export from "@/interfaces/http/api/export";
+import { playlistApi } from "@/interfaces/http/api/playlist";
+import { collaborationApi } from "@/interfaces/http/api/collaboration";
+import { exportApi } from "@/interfaces/http/api/export";
 import { errorHandler } from "./middleware/pre-response";
 import morganMiddleware from "./middleware/logger";
 import { redisConnection } from "@/Infrastructures/cache/redis/redis-connection";
@@ -11,7 +12,7 @@ import { collectDefaultMetrics, register } from "prom-client";
 import { CorsMiddleware } from "./middleware/cors";
 import { metricsMiddleware } from "./middleware/metrics";
 
-export const createServer = async () => {
+export const createServer = async (container: Container) => {
     const app = express();
     try {
         await redisConnection.connect();
@@ -34,9 +35,9 @@ export const createServer = async () => {
 
     app.use(urlencoded({ extended: true }));
 
-    app.use("/playlists", playlist);
-    app.use("/collaborations", collaboration);
-    app.use("/export", _export);
+    app.use("/playlists", playlistApi(container));
+    app.use("/collaborations", collaborationApi(container));
+    app.use("/export", exportApi(container));
     app.use(errorHandler);
     return app;
 };

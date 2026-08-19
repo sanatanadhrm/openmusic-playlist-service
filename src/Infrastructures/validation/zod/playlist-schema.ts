@@ -5,19 +5,25 @@ import { InvariantError } from "@/commons/exception/invariant-error";
 import z from "zod";
 
 const playlistSchema = z.object({
-    name: z.string(DomainErrorCode.PLAYLIST_NOT_MEET_DATA_TYPE_SPECIFICATION)
-        .min(1, DomainErrorCode.PLAYLIST_NOT_CONTAIN_NEEDED_PROPERTY),
+    name: z.string("name must be string")
+        .min(1, "name must not be empty"),
 });
 
 const playlistSongSchema = z.object({
-    songId: z.string(DomainErrorCode.PLAYLIST_SONG_NOT_MEET_DATA_TYPE_SPECIFICATION)
-        .min(1, DomainErrorCode.PLAYLIST_SONG_NOT_CONTAIN_NEEDED_PROPERTY),
+    songId: z.string("songId must be string")
+        .min(1, "songId must not be empty"),
 });
 
 const playlistSongListParamsSchema = z.object({
-    page: z.coerce.number().min(1).optional().default(1),
-    limit: z.coerce.number().min(1).optional().default(10),
-    q: z.string().optional(),
+    page: z.coerce.number("page must be number")
+        .min(1, "page must be >= 1")
+        .optional()
+        .default(1),
+    limit: z.coerce.number("limit must be number")
+        .min(1, "limit must be >= 1")
+        .optional()
+        .default(10),
+    q: z.string("q must be string").optional(),
 });
 
 export class ZodPlaylistValidator implements PlaylistValidator {

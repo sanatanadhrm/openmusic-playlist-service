@@ -1,13 +1,11 @@
 import { config } from "./commons/config";
-import { postgresql } from "./Infrastructures/database/postgresql/postgre-sql";
 import { createServer } from "./Infrastructures/http/create-server";
-import { startSongConsumer } from "./Infrastructures/message/rabbitmq/song-consumer";
+import { container } from "./Infrastructures/container";
+import { createBroker } from "./Infrastructures/message/create-broker";
 
 (async () => {
-    const app = await createServer();
-
-    // Start CQRS Consumer
-    await startSongConsumer(postgresql);
+    const app = await createServer(container);
+    await createBroker(container);
 
     app.listen(config.app.port, () => {
         console.log(`Server is running on http://${config.app.host}:${config.app.port}`);

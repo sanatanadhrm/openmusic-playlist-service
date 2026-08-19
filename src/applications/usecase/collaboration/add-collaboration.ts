@@ -3,7 +3,6 @@
 
 import { CollaborationValidator } from "@/applications/validation/collaboration-validator";
 import { DomainErrorCode } from "@/commons/exception/constants/domain-error-code";
-import { InvariantError } from "@/commons/exception/invariant-error";
 import { AddedCollaboration, CollaborationRepository } from "@/domains/collaboration/collaboration-repository";
 import { PlaylistRepository } from "@/domains/playlist/playlist-repository";
 import { UserRepository } from "@/domains/user/user-repository";

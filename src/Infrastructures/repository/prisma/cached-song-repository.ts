@@ -1,4 +1,5 @@
-import { AddCachedSongPayload, CachedSongRepository } from "@/domains/cached-song/cached-song-repository";
+import { CachedSongRepository } from "@/domains/cached-song/cached-song-repository";
+import { AddCachedSongPayload } from "@/domains/cached-song/entities/payload/cached-song-payload";
 import { PrismaClient } from "@/Infrastructures/database/postgresql/generated/prisma/client";
 
 export class CachedSongRepositoryPrisma implements CachedSongRepository {
@@ -8,15 +9,11 @@ export class CachedSongRepositoryPrisma implements CachedSongRepository {
         this._prisma = prisma;
     }
 
-    async verifySongExists(songId: string): Promise<boolean> {
-        const song = await this._prisma.cachedSong.findUnique({
-            where: { id: songId },
-        });
-        return !!song
-    }
-    async addCachedSong(payload: AddCachedSongPayload): Promise<void> {
-        await this._prisma.cachedSong.create({
-            data: payload,
+    async updateInsertCachedSong(payload: AddCachedSongPayload): Promise<void> {
+        await this._prisma.cachedSong.upsert({
+            where: { id: payload.id },
+            update: payload,
+            create: payload,
         });
     }
     async removeCachedSong(songId: string): Promise<void> {
