@@ -1,12 +1,5 @@
-export interface SongDetailResponse {
-    id: string;
-    title: string;
-    year: number;
-    performer: string;
-    genre: string;
-    duration: number | null;
-    albumId: string | null;
-}
+import { SongDetailResponse } from "./types/detail-song";
+
 
 
 export interface SongRepository {

@@ -1,8 +1,8 @@
 import { catalogClient } from "@/commons/config";
-import { SongDetailResponse, SongRepository } from "@/domains/song/song-repository";
+import { SongRepository } from "@/domains/song/song-repository";
 import { NotFoundError } from "@/commons/exception/not-found-error";
 import { DomainErrorCode } from "@/commons/exception/constants/domain-error-code";
-import { IDetailSongResponse } from "@/domains/song/types/detail-song";
+import { IDetailSongResponse, SongDetailResponse } from "@/domains/song/types/detail-song";
 
 export class SongRepositoryAxios implements SongRepository {
     async getSongById(songId: string): Promise<SongDetailResponse> {

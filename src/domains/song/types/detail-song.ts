@@ -11,4 +11,5 @@ export interface DetailSong {
         albumId: string | null;
     }
 }
+export type SongDetailResponse = DetailSong["song"]
 export type IDetailSongResponse = ApiResponse<DetailSong>
