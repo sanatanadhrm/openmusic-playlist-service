@@ -2,5 +2,5 @@
 // Interface untuk layanan Message Broker
 
 export interface MessageBrokerService {
-    sendMessage(queue: string, message: string): Promise<void>;
+    sendMessage(queue: string, eventName: string, message: string): Promise<void>;
 }

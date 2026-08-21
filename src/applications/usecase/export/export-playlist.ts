@@ -41,6 +41,6 @@ export class ExportPlaylistUseCase {
         });
 
         // 5. Kirim ke antrean 'export:playlists'
-        await this._messageBrokerService.sendMessage("export:playlists", message);
+        // await this._messageBrokerService.sendMessage("export:playlists", message);
     }
 }

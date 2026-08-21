@@ -8,7 +8,7 @@ import { FilePayload, StorageService } from "@/applications/storage/storage-serv
 export class LocalStorageService implements StorageService {
     private _folder: string;
 
-    constructor(folder: string) {
+    constructor(folder: string = path.resolve(process.cwd(), "uploads", "file", "images")) {
         this._folder = folder;
 
         // Pastikan folder tersedia saat inisialisasi

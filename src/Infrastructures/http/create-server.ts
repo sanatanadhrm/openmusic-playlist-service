@@ -6,7 +6,6 @@ import { collaborationApi } from "@/interfaces/http/api/collaboration";
 import { exportApi } from "@/interfaces/http/api/export";
 import { errorHandler } from "./middleware/pre-response";
 import morganMiddleware from "./middleware/logger";
-import { redisConnection } from "@/Infrastructures/cache/redis/redis-connection";
 import logger from "@/Infrastructures/logger/winston/winston-config";
 import { collectDefaultMetrics, register } from "prom-client";
 import { CorsMiddleware } from "./middleware/cors";
@@ -14,12 +13,6 @@ import { metricsMiddleware } from "./middleware/metrics";
 
 export const createServer = async (container: Container) => {
     const app = express();
-    try {
-        await redisConnection.connect();
-    } catch (error) {
-        logger.error("Gagal konek Redis. Matikan server!", error);
-        process.exit(1);
-    }
 
     app.use(morganMiddleware);
     app.use(json());

@@ -17,7 +17,7 @@ const envSchema = z.object({
     ACCESS_TOKEN_AGE: z.coerce.number().default(3000),
 
     REDIS_URL: z.string().default("redis://localhost:6379"),
-    RABBITMQ_SERVER: z.string().optional(),
+    RABBITMQ_SERVER: z.string(),
     CATALOG_SERVICE_URL: z.string().default("http://localhost:3002"),
     CATALOG_SERVICE_API_KEY: z.string().default("catalog_token_key"),
     AUTH_SERVICE_URL: z.string().default("http://localhost:3001"),

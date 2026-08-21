@@ -1,36 +1,33 @@
 import { Container } from "instances-container";
 import logger from "../logger/winston/winston-config";
-import { rabbitMQConnection } from "./rabbitmq/rabbitmq-connection";
-import { RabbitMQApp } from "./rabbitmq/rabbitmq";
 import { songQueue } from "@/interfaces/message/rabbitmq/song-queue";
+import { RabbitMQConnection } from "./rabbitmq/rabbitmq-connection";
+import { RabbitMQListener } from "./rabbitmq/rabbitmq-listener";
+import { SONG_QUEUE } from "@/domains/song/constants/song-queue";
 
 export const createBroker = async (container: Container) => {
     try {
-        const channel = await rabbitMQConnection.getChannel();
+        const brokerConn = container.getInstance(RabbitMQConnection.name) as RabbitMQConnection;
+        await brokerConn.connect();
 
-        const brokerApp = new RabbitMQApp(channel);
+        const brokerListener = container.getInstance(RabbitMQListener.name) as RabbitMQListener;
 
-        brokerApp.use("song.created", songQueue(container));
-        brokerApp.use("song.updated", songQueue(container));
-        brokerApp.use("song.deleted", songQueue(container));
+        brokerListener.useQueue({
+            queueName: SONG_QUEUE.BASE, // Sinkron dengan Catalog Service
+            router: songQueue(container)
+        })
+        await brokerListener.startConsumers();
 
-        await brokerApp.start();
 
         logger.info("RabbitMQ Consumer started successfully.");
 
-        process.on('SIGINT', async () => {
-            logger.info("Stopping RabbitMQ Consumers...");
-            await brokerApp.stop();
-            process.exit(0);
-        });
-
-        process.on('SIGTERM', async () => {
-            logger.info("Stopping RabbitMQ Consumers...");
-            await brokerApp.stop();
-            process.exit(0);
-        });
-
-        return brokerApp;
+        const handleShutdown = async () => {
+            logger.info("RabbitMQ: Menutup channel dan koneksi...");
+            await brokerConn.close();
+        };
+        process.on("SIGINT", handleShutdown);
+        process.on("SIGTERM", handleShutdown);
+        return brokerListener;
     } catch (error) {
         logger.error("Failed to start RabbitMQ consumers:", error);
         throw error;
