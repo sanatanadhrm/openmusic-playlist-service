@@ -16,7 +16,6 @@ export function authenticateJWT(req: Request, res: Response, next: NextFunction)
                 username: req.headers['x-user-username'] as string,
                 role: req.headers['x-user-role'] as string
             };
-
             return next();
         }
         const token = req.header("Authorization")?.split(" ")[1];

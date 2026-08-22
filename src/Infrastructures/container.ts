@@ -4,6 +4,7 @@ import { createContainer } from "instances-container";
 // Database & Cache
 import { postgresql } from "./database/postgresql/postgre-sql";
 import { RedisClientService } from "./cache/redis/redis-service";
+import { RedisConnection } from "./cache/redis/redis-connection";
 
 // Logger
 import { WinstonLoggerService } from "./logger/winston/winston-service";
@@ -24,6 +25,8 @@ import { ZodExportValidator } from "./validation/zod/export-schema";
 
 // Message Broker
 import { RabbitMQService } from "./message/rabbitmq/rabbitmq-service";
+import { RabbitMQConnection } from "./message/rabbitmq/rabbitmq-connection";
+import { RabbitMQListener } from "./message/rabbitmq/rabbitmq-listener";
 
 // Use Cases
 import { AddPlaylistUseCase } from "@/applications/usecase/playlist/add-playlist";
@@ -40,22 +43,61 @@ import { AddCachedSongUseCase } from "@/applications/usecase/cached-song/add-cac
 import { ZodCachedSongValidator } from "./validation/zod/cached-song-schema";
 import { UpdateCachedSongUseCase } from "@/applications/usecase/cached-song/update-cached-song";
 import { RemoveCachedSongUseCase } from "@/applications/usecase/cached-song/remove-cached-song";
+import { AxiosApiSevice } from "./api/axios/axios-service";
+import { OpposumCircuitBreakerService } from "./circuit-breaker/opposum/opposum-service";
+import { authClient, catalogClient } from "@/commons/config";
 
 const container = createContainer();
 
 // ==========================================
 // REGISTER INFRASTRUCTURE & REPOSITORIES
 // ==========================================
+
+const catalogAxiosService = new AxiosApiSevice(catalogClient);
+const userAxiosService = new AxiosApiSevice(authClient)
 container.register([
+
+
     {
         key: WinstonLoggerService.name,
         Class: WinstonLoggerService,
         parameter: { dependencies: [] },
     },
     {
+        key: OpposumCircuitBreakerService.name,
+        Class: OpposumCircuitBreakerService,
+        parameter: {
+            injectType: "destructuring",
+
+            dependencies: [
+                { name: "logger", internal: WinstonLoggerService.name }
+            ]
+        }
+    },
+    {
+        key: AxiosApiSevice.name,
+        Class: AxiosApiSevice,
+        parameter: { dependencies: [] }
+    },
+    {
+        key: RedisConnection.name,
+        Class: RedisConnection,
+        parameter: {
+            dependencies: [
+                { internal: WinstonLoggerService.name },
+            ],
+        },
+    },
+    {
         key: RedisClientService.name,
         Class: RedisClientService,
-        parameter: { dependencies: [] },
+        parameter: {
+            injectType: "destructuring",
+            dependencies: [
+                { name: "logger", internal: WinstonLoggerService.name },
+                { name: "connection", internal: RedisConnection.name },
+            ]
+        },
     },
     {
         key: PlaylistRepositoryPrisma.name,
@@ -112,17 +154,57 @@ container.register([
     {
         key: UserRepositoryAxios.name,
         Class: UserRepositoryAxios,
-        parameter: { dependencies: [] },
+        parameter: {
+            injectType: "destructuring",
+            dependencies: [
+                { name: "axiosService", concrete: userAxiosService },
+                { name: "circuitBreakerService", internal: OpposumCircuitBreakerService.name },
+            ]
+        },
     },
+
     {
         key: SongRepositoryAxios.name,
         Class: SongRepositoryAxios,
-        parameter: { dependencies: [] },
+        parameter: {
+            injectType: "destructuring",
+            dependencies: [
+                { name: "axiosService", concrete: catalogAxiosService },
+                { name: "circuitBreakerService", internal: OpposumCircuitBreakerService.name },
+            ]
+        },
+    },
+    {
+        key: RabbitMQConnection.name,
+        Class: RabbitMQConnection,
+        parameter: {
+            injectType: "destructuring",
+            dependencies: [
+                { name: "logger", internal: WinstonLoggerService.name }
+            ]
+        }
     },
     {
         key: RabbitMQService.name,
         Class: RabbitMQService,
-        parameter: { dependencies: [] },
+        parameter: {
+            injectType: "destructuring",
+            dependencies: [
+                { name: "logger", internal: WinstonLoggerService.name },
+                { name: "connection", internal: RabbitMQConnection.name }
+            ]
+        }
+    },
+    {
+        key: RabbitMQListener.name,
+        Class: RabbitMQListener,
+        parameter: {
+            injectType: "destructuring",
+            dependencies: [
+                { name: "logger", internal: WinstonLoggerService.name },
+                { name: "connection", internal: RabbitMQConnection.name }
+            ]
+        }
     },
 
     // Validators

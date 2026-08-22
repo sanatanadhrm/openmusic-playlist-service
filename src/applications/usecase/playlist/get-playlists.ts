@@ -20,10 +20,16 @@ export class GetPlaylistsUseCase {
     // userId dari req.user.id — repository akan filter owner + collaborator
     async execute(userId: string): Promise<Playlists[]> {
         const playlist = await this._playlistRepository.getPlaylistsByUserId(userId);
+        if (playlist.length === 0) {
+            return []
+        }
+        console.log(playlist)
         const userIds = playlist.map((p) => p.ownerId);
+        console.log(userIds)
         const userMap = new Map<string, string>();
 
         const users = await this._userRepository.getUserByIds(userIds);
+        console.log(users)
         users.forEach((user) => {
             userMap.set(user.id, user.username)
         });
